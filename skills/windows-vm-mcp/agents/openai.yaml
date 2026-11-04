@@ -1,0 +1,4 @@
+interface:
+  display_name: "Windows VM MCP"
+  short_description: "Use the shared Windows CTF VM through MCP"
+  default_prompt: "Use the Windows VM MCP skill to run an isolated Windows CTF analysis task."

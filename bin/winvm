@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root="${WINDOWS_VM_ROOT:-$(cd "$(dirname "$(realpath "$0")")/.." && pwd)}"
+cd "$root"
+config="${WINDOWS_VM_CONFIG:-windows-11-English-International.conf}"
+case "${1:-}" in
+  gui|headless)
+    windows_iso=windows-11-English-International/windows-11.iso
+    virtio_iso=windows-11-English-International/virtio-win.iso
+    if [[ ! -f "$windows_iso" || $(stat -c %s "$windows_iso") -ne 9061271552 ]]; then
+      echo 'Windows ISO is incomplete or differs from the expected build; see README.md.' >&2
+      exit 1
+    fi
+    if [[ ! -f "$virtio_iso" || $(stat -c %s "$virtio_iso") -lt 800000000 ]]; then
+      echo 'VirtIO ISO is incomplete; see README.md.' >&2
+      exit 1
+    fi
+    if [[ "$1" == gui ]]; then
+      exec quickemu --vm "$config" --display spice --viewer spicy --public-dir none
+    fi
+    exec quickemu --vm "$config" --display spice --viewer none --public-dir none ;;
+  poweroff) exec quickemu --vm "$config" --display spice --viewer none --public-dir none --monitor-cmd system_powerdown ;;
+  snapshot-info) exec quickemu --vm "$config" --snapshot info ;;
+  *) echo "Usage: $0 {gui|headless|poweroff|snapshot-info}" >&2; exit 2 ;;
+esac

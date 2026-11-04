@@ -1,0 +1,23 @@
+# Local VM state and media
+windows-11-English-International/*.qcow2
+windows-11-English-International/*.iso
+windows-11-English-International/*.ISO
+windows-11-English-International/*.fd
+windows-11-English-International/*.sock
+windows-11-English-International/*.socket
+windows-11-English-International/*.pid
+windows-11-English-International/*.log
+windows-11-English-International/*.ports
+windows-11-English-International/t/
+.mcp-state/
+.playwright-cli/
+.venv/
+__pycache__/
+*.py[cod]
+assistant-work/
+*.tmp
+*.part
+tools/SysinternalsSuite.zip
+samples/
+results/
+

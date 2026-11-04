@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Minimal QEMU guest agent client for the isolated Windows VM."""
+import argparse
+import base64
+import json
+import os
+import socket
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(os.environ.get('WINDOWS_VM_ROOT', Path(__file__).resolve().parent.parent)).resolve()
+VM_DIR = Path(os.environ.get('WINDOWS_VM_DIR', ROOT / 'windows-11-English-International'))
+SOCKET = Path(os.environ.get('WINDOWS_VM_AGENT_SOCKET', VM_DIR / 'windows-11-English-International-agent.sock'))
+
+class Agent:
+    def __init__(self):
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.sock.settimeout(15)
+        self.sock.connect(str(SOCKET))
+        self.stream = self.sock.makefile('rb')
+        self.ident = 0
+    def call(self, command, **arguments):
+        self.ident += 1
+        request = {'execute': command, 'id': self.ident}
+        if arguments:
+            request['arguments'] = arguments
+        self.sock.sendall((json.dumps(request) + '\n').encode())
+        while True:
+            line = self.stream.readline()
+            if not line:
+                raise RuntimeError('Guest agent disconnected')
+            try:
+                result = json.loads(line.lstrip(b'\xff'))
+            except json.JSONDecodeError:
+                continue
+            if result.get('id') == self.ident:
+                if 'error' in result:
+                    raise RuntimeError(str(result['error']))
+                return result['return']
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    subs = parser.add_subparsers(dest='action', required=True)
+    subs.add_parser('ping')
+    run = subs.add_parser('run')
+    run.add_argument('--timeout', type=float, default=60)
+    run.add_argument('program')
+    run.add_argument('args', nargs=argparse.REMAINDER)
+    for name in ('put', 'get'):
+        p = subs.add_parser(name)
+        p.add_argument('source')
+        p.add_argument('destination')
+    a = parser.parse_args()
+    agent = Agent()
+    if a.action == 'ping':
+        agent.call('guest-ping')
+        print('Guest agent is ready')
+    elif a.action == 'run':
+        pid = agent.call('guest-exec', path=a.program, arg=a.args, **{'capture-output': True})['pid']
+        deadline = time.monotonic() + a.timeout
+        while True:
+            result = agent.call('guest-exec-status', pid=pid)
+            if result['exited']:
+                for key, stream in [('out-data', sys.stdout.buffer), ('err-data', sys.stderr.buffer)]:
+                    if key in result:
+                        stream.write(base64.b64decode(result[key]))
+                        stream.flush()
+                if result.get('out-truncated') or result.get('err-truncated'):
+                    print('Warning: guest agent truncated output', file=sys.stderr)
+                return result.get('exitcode', 1)
+            if time.monotonic() >= deadline:
+                print(f'Timed out; guest PID {pid} may still be running', file=sys.stderr)
+                return 124
+            time.sleep(0.5)
+    else:
+        guest_path = a.destination if a.action == 'put' else a.source
+        handle = agent.call('guest-file-open', path=guest_path, mode='wb' if a.action == 'put' else 'rb')
+        try:
+            if a.action == 'put':
+                with open(a.source, 'rb') as local:
+                    while chunk := local.read(48 * 1024):
+                        data = base64.b64encode(chunk).decode()
+                        written = agent.call('guest-file-write', handle=handle, **{'buf-b64': data})
+                        if written['count'] != len(chunk):
+                            raise RuntimeError('Incomplete guest file write')
+            else:
+                with open(a.destination, 'xb') as local:
+                    while True:
+                        result = agent.call('guest-file-read', handle=handle, count=48 * 1024)
+                        local.write(base64.b64decode(result.get('buf-b64', '')))
+                        if result['eof']:
+                            break
+        finally:
+            agent.call('guest-file-close', handle=handle)
+    return 0
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f'win-agent: {exc}', file=sys.stderr)
+        sys.exit(1)
