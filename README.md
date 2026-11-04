@@ -2,6 +2,19 @@
 
 Windows 11 x64, English International, Quickemu. The VM uses 4 vCPUs, 4 GiB RAM, an 80 GiB thin-provisioned disk and no guest network. The first installation uses Quickemu's unattended answer file, which accepts the Windows license, selects Windows Pro and creates the local administrator `Quickemu` with the default password `quickemu` and automatic login. This is a disposable lab account, not an activated Windows license. UAC is disabled by the Quickemu answer file. Review `windows-11-English-International/unattended/autounattend.xml` before first boot.
 
+## Documentation index
+
+- [SETUP.md](SETUP.md) - public setup guide for Quickemu, Windows media, VirtIO, the guest agent, MCP clients, and tool updates.
+- [MCP.md](MCP.md) - MCP registration, lease workflow, file transfer, execution, and recovery.
+- [CONTINUE.md](CONTINUE.md) - continuation notes for completing or validating a local VM installation.
+- [skills/windows-vm-mcp/SKILL.md](skills/windows-vm-mcp/SKILL.md) - Codex skill and required workflow for using the VM.
+- [skills/windows-vm-mcp/references/operations.md](skills/windows-vm-mcp/references/operations.md) - operational reference, safety notes, and verification limits.
+- [tools/README.md](tools/README.md) - third-party tool provenance, licensing boundaries, and update policy.
+- [examples/windows-11-ctf.conf](examples/windows-11-ctf.conf) - portable Quickemu configuration template with local media placeholders.
+- [LICENSE](LICENSE) - MIT license for this project's code and skill.
+
+The repository also includes [requirements.txt](requirements.txt), which lists the Python dependency needed by the MCP server.
+
 Run commands from this directory:
 
 ```bash
