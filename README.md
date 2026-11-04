@@ -6,12 +6,8 @@ Windows 11 x64, English International, Quickemu. The VM uses 4 vCPUs, 4 GiB RAM,
 
 - [SETUP.md](SETUP.md) - public setup guide for Quickemu, Windows media, VirtIO, the guest agent, MCP clients, and tool updates.
 - [MCP.md](MCP.md) - MCP registration, lease workflow, file transfer, execution, and recovery.
-- [CONTINUE.md](CONTINUE.md) - continuation notes for completing or validating a local VM installation.
-- [skills/windows-vm-mcp/SKILL.md](skills/windows-vm-mcp/SKILL.md) - Codex skill and required workflow for using the VM.
-- [skills/windows-vm-mcp/references/operations.md](skills/windows-vm-mcp/references/operations.md) - operational reference, safety notes, and verification limits.
 - [tools/README.md](tools/README.md) - third-party tool provenance, licensing boundaries, and update policy.
 - [examples/windows-11-ctf.conf](examples/windows-11-ctf.conf) - portable Quickemu configuration template with local media placeholders.
-- [LICENSE](LICENSE) - MIT license for this project's code and skill.
 
 The repository also includes [requirements.txt](requirements.txt), which lists the Python dependency needed by the MCP server.
 
