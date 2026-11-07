@@ -31,6 +31,7 @@ The installer automatically detects installed agent CLIs (`agy`, `codex`, `claud
 | **OS** | Linux x86_64 with KVM (`/dev/kvm`) | `qemu-system-x86` | `qemu-desktop` | `qemu-kvm` |
 | **VM Launcher** | Quickemu (v4.9+) | `quickemu` | `quickemu` | `quickemu` |
 | **SPICE Viewer** | `spicy` (for socket & GUI) | `spicy` (`spice-client-gtk`) | `spice-gtk` | `spice-gtk` |
+| **ISO Tool** | `mkisofs` / `genisoimage` (builds `tools.iso`) | `genisoimage` | `cdrtools` | `genisoimage` |
 | **Python** | Python 3.10+ & venv | `python3 python3-venv` | `python` | `python3` |
 | **VCS** | Git | `git` | `git` | `git` |
 | **Fast venv** *(opt)* | `uv` | [astral.sh/uv](https://astral.sh/uv) | `uv` | `uv` |
@@ -40,17 +41,17 @@ The installer automatically detects installed agent CLIs (`agy`, `codex`, `claud
 
 - **Ubuntu / Debian**:
   ```bash
-  sudo apt update && sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git
+  sudo apt update && sudo apt install -y qemu-system-x86 quickemu spicy genisoimage python3 python3-venv git
   sudo usermod -aG kvm $USER
   ```
 - **Arch Linux**:
   ```bash
-  sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git
+  sudo pacman -S --needed qemu-desktop quickemu spice-gtk cdrtools python git
   sudo usermod -aG kvm $USER
   ```
 - **Fedora**:
   ```bash
-  sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git
+  sudo dnf install -y qemu-kvm quickemu spice-gtk genisoimage python3 git
   sudo usermod -aG kvm $USER
   ```
 

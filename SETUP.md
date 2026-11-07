@@ -33,6 +33,7 @@ Before running the VM or installer, ensure the host system meets the following r
 - **QEMU**: `qemu-system-x86_64` package providing system emulation and KVM acceleration.
 - **Quickemu**: Quickemu v4.9+ (`quickemu` and `quickget` commands).
 - **SPICE**: `spicy` viewer (`spice-client-gtk` or `spice-gtk`).
+- **ISO Tool**: `genisoimage` / `mkisofs` (from `genisoimage` or `cdrtools` package, to build `tools.iso`).
 - **Python**: Python 3.10 or newer with standard library venv support (or `uv`).
 - **Git**: `git` client.
 
@@ -41,17 +42,17 @@ Before running the VM or installer, ensure the host system meets the following r
 - **Ubuntu / Debian**:
   ```bash
   sudo apt update
-  sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git
+  sudo apt install -y qemu-system-x86 quickemu spicy genisoimage python3 python3-venv git
   sudo usermod -aG kvm $USER
   ```
 - **Arch Linux**:
   ```bash
-  sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git
+  sudo pacman -S --needed qemu-desktop quickemu spice-gtk cdrtools python git
   sudo usermod -aG kvm $USER
   ```
 - **Fedora**:
   ```bash
-  sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git
+  sudo dnf install -y qemu-kvm quickemu spice-gtk genisoimage python3 git
   sudo usermod -aG kvm $USER
   ```
 

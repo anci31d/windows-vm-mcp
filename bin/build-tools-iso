@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Build tools.iso containing x64dbg and tools installer for Windows VM
+
+root="${WINDOWS_VM_ROOT:-$(cd "$(dirname "$(realpath "$0")")/.." && pwd)}"
+cd "$root"
+
+target_iso="${1:-windows-11-English-International/tools.iso}"
+tools_dir="$root/tools"
+
+if [[ ! -f "$tools_dir/x64dbg.zip" || ! -f "$tools_dir/install-tools.ps1" ]]; then
+    echo "Error: required source files tools/x64dbg.zip or tools/install-tools.ps1 not found." >&2
+    exit 1
+fi
+
+iso_cmd=""
+if command -v mkisofs >/dev/null 2>&1; then
+    iso_cmd="mkisofs"
+elif command -v genisoimage >/dev/null 2>&1; then
+    iso_cmd="genisoimage"
+elif command -v xorrisofs >/dev/null 2>&1; then
+    iso_cmd="xorrisofs"
+else
+    echo "Error: no ISO creation utility found (mkisofs, genisoimage, or xorrisofs). Please install cdrtools or genisoimage." >&2
+    exit 1
+fi
+
+mkdir -p "$(dirname "$target_iso")"
+
+staging_dir="$(mktemp -d -t tools-iso-XXXXXX)"
+trap 'rm -rf "$staging_dir"' EXIT
+
+cp "$tools_dir/x64dbg.zip" "$staging_dir/"
+cp "$tools_dir/install-tools.ps1" "$staging_dir/"
+
+echo "Generating $target_iso using $iso_cmd..."
+"$iso_cmd" -quiet -J -r -V "TOOLS" -o "$target_iso" "$staging_dir/"
+echo "Successfully created $target_iso"

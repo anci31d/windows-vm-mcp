@@ -7,6 +7,10 @@ case "${1:-}" in
   gui|headless)
     windows_iso=windows-11-English-International/windows-11.iso
     virtio_iso=windows-11-English-International/virtio-win.iso
+    tools_iso=windows-11-English-International/tools.iso
+    if [[ ! -f "$tools_iso" ]]; then
+      bin/build-tools-iso "$tools_iso"
+    fi
     if [[ ! -f "$windows_iso" || $(stat -c %s "$windows_iso") -ne 9061271552 ]]; then
       echo 'Windows ISO is incomplete or differs from the expected build; see README.md.' >&2
       exit 1

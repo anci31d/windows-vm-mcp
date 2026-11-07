@@ -39,6 +39,7 @@ print_full_dependencies() {
     echo -e "${BOLD}2. Runtime & Tools (Required):${NC}"
     echo "  - Python:       python3 (version 3.10+) with python3-venv"
     echo "  - Git:          git"
+    echo "  - ISO creation: genisoimage / mkisofs (for generating tools.iso)"
     echo
     echo -e "${BOLD}3. Optional / Recommended:${NC}"
     echo "  - Fast Python:  uv (replaces python3-venv for near-instant setups)"
@@ -49,15 +50,15 @@ print_full_dependencies() {
     echo -e "${BOLD}Install commands for your distribution:${NC}"
     echo -e "  ${BOLD}Ubuntu / Debian:${NC}"
     echo "    sudo apt update"
-    echo "    sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git"
+    echo "    sudo apt install -y qemu-system-x86 quickemu spicy genisoimage python3 python3-venv git"
     echo "    sudo usermod -aG kvm \$USER"
     echo
     echo -e "  ${BOLD}Arch Linux:${NC}"
-    echo "    sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git"
+    echo "    sudo pacman -S --needed qemu-desktop quickemu spice-gtk cdrtools python git"
     echo "    sudo usermod -aG kvm \$USER"
     echo
     echo -e "  ${BOLD}Fedora:${NC}"
-    echo "    sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git"
+    echo "    sudo dnf install -y qemu-kvm quickemu spice-gtk genisoimage python3 git"
     echo "    sudo usermod -aG kvm \$USER"
     echo -e "  ${YELLOW}* Note: log out and back in after adding your user to the kvm group.${NC}\n"
 }
@@ -162,6 +163,9 @@ fi
 if ! command -v git >/dev/null 2>&1; then
     missing_pkgs+=("git")
 fi
+if ! command -v mkisofs >/dev/null 2>&1 && ! command -v genisoimage >/dev/null 2>&1 && ! command -v xorrisofs >/dev/null 2>&1; then
+    missing_pkgs+=("genisoimage / mkisofs (cdrtools)")
+fi
 
 if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
     warn "Missing required/recommended packages: ${missing_pkgs[*]}"
@@ -248,8 +252,19 @@ info "Running self-verification tests..."
 "$REPO_DIR/.venv/bin/python" -m unittest discover -s "$REPO_DIR/tests" -v
 success "Self-verification tests passed!"
 
-# 7. Interactive ISO Download Prompt
+# 7. Setup tools.iso
 vm_dir="$REPO_DIR/windows-11-English-International"
+tools_iso="$vm_dir/tools.iso"
+
+if [[ ! -f "$tools_iso" ]]; then
+    info "Generating tools.iso (x64dbg and tools installer)..."
+    "$REPO_DIR/bin/build-tools-iso" "$tools_iso"
+    success "tools.iso generated at $tools_iso."
+else
+    info "tools.iso is already present."
+fi
+
+# 8. Interactive ISO Download Prompt
 windows_iso="$vm_dir/windows-11.iso"
 virtio_iso="$vm_dir/virtio-win.iso"
 
@@ -273,7 +288,7 @@ else
     info "Windows 11 ISO files are already present."
 fi
 
-# 8. Finished
+# 9. Finished
 echo
 success "windows-vm-mcp successfully installed!"
 echo -e "  Location:      ${BOLD}$REPO_DIR${NC}"
