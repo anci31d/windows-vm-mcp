@@ -115,8 +115,12 @@ If downloading manually or copying from an existing archive:
    curl -fLo windows-11-English-International/virtio-win.iso \
      https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso
    ```
-3. **Unattended Setup**:
-   Ensure `windows-11-English-International/unattended/autounattend.xml` exists (the repository includes a template). Build `unattended.iso`:
+3. **Unattended Answer File (`autounattend.xml`)**:
+   The repository already includes a complete, pre-configured answer file at `windows-11-English-International/unattended/autounattend.xml`.
+   - **Editing is NOT required**: it is completely ready out of the box. It automatically partitions the virtual drive, selects Windows Pro, enables auto-logon for the user `Quickemu` (password: `quickemu`), disables UAC, and installs the QEMU Guest Agent and VirtIO drivers.
+   - **Optional customization**: If you wish to change the username or password, modify the `<UserAccounts>` and `<AutoLogon>` tags inside `autounattend.xml`.
+   
+   Build `unattended.iso`:
    ```bash
    genisoimage -quiet -J -o windows-11-English-International/unattended.iso windows-11-English-International/unattended/
    ```
