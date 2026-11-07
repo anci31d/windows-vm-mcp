@@ -89,7 +89,7 @@ elif [[ -n "${WINDOWS_VM_DIR:-}" && -f "$WINDOWS_VM_DIR/bin/windows-vm-mcp" ]]; 
     REPO_DIR="$(cd "$WINDOWS_VM_DIR" && pwd)"
     info "Installing from WINDOWS_VM_DIR: $REPO_DIR"
 else
-    BRANCH="${WINDOWS_VM_BRANCH:-feature/one-line-installer}"
+    BRANCH="${WINDOWS_VM_BRANCH:-master}"
     DEFAULT_TARGET="${WINDOWS_VM_DIR:-$HOME/.local/share/windows-vm-mcp}"
     if [[ -d "$DEFAULT_TARGET/.git" ]]; then
         info "Updating existing repository at $DEFAULT_TARGET..."
