@@ -81,24 +81,6 @@ for arg in "$@"; do
     esac
 done
 
-prompt_user() {
-    local prompt_msg="$1"
-    local default_val="$2"
-    local ans=""
-    if [[ "$AUTO_YES" == "true" ]]; then
-        echo "$default_val"
-        return
-    fi
-    if [ -t 0 ]; then
-        read -r -p "$prompt_msg" ans || ans="$default_val"
-    elif [ -e /dev/tty ] && [ -r /dev/tty ]; then
-        read -r -p "$prompt_msg" ans < /dev/tty || ans="$default_val"
-    else
-        ans="$default_val"
-    fi
-    echo "${ans:-$default_val}"
-}
-
 # 1. Determine Repository Directory
 if [[ -f "./bin/windows-vm-mcp" && -f "./requirements.txt" ]]; then
     REPO_DIR="$(cd . && pwd)"
@@ -252,46 +234,11 @@ info "Running self-verification tests..."
 "$REPO_DIR/.venv/bin/python" -m unittest discover -s "$REPO_DIR/tests" -v
 success "Self-verification tests passed!"
 
-# 7. Setup tools.iso
-vm_dir="$REPO_DIR/windows-11-English-International"
-tools_iso="$vm_dir/tools.iso"
-
-if [[ ! -f "$tools_iso" ]]; then
-    info "Generating tools.iso (x64dbg and tools installer)..."
-    "$REPO_DIR/bin/build-tools-iso" "$tools_iso"
-    success "tools.iso generated at $tools_iso."
-else
-    info "tools.iso is already present."
-fi
-
-# 8. Interactive ISO Download Prompt
-windows_iso="$vm_dir/windows-11.iso"
-virtio_iso="$vm_dir/virtio-win.iso"
-
-if [[ ! -f "$windows_iso" || ! -f "$virtio_iso" ]]; then
-    echo
-    answer=$(prompt_user "Windows 11 VM ISOs not found. Download now using quickget? [y/N]: " "n")
-
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        if command -v quickget >/dev/null 2>&1; then
-            info "Downloading Windows 11 with quickget..."
-            mkdir -p "$vm_dir"
-            (cd "$vm_dir" && quickget windows 11)
-            success "ISO download finished."
-        else
-            warn "quickget command not found. Install quickemu first, then run 'quickget windows 11'."
-        fi
-    else
-        info "Skipped ISO download. You can run 'quickget windows 11' later in $vm_dir."
-    fi
-else
-    info "Windows 11 ISO files are already present."
-fi
-
-# 9. Finished
+# 7. Finished
 echo
 success "windows-vm-mcp successfully installed!"
 echo -e "  Location:      ${BOLD}$REPO_DIR${NC}"
 echo -e "  MCP binary:    ${BOLD}$MCP_EXEC${NC}"
 echo -e "  Registrations: $registered_count agent(s) configured"
+echo -e "  Next steps:    Follow ${BOLD}SETUP.md${NC} to prepare VM files (Windows ISO, VirtIO, tools.iso)"
 echo -e "  To uninstall:  run ${BOLD}$REPO_DIR/uninstall.sh${NC}\n"
