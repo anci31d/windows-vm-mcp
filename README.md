@@ -2,6 +2,28 @@
 
 Windows 11 x64, English International, Quickemu. The VM uses 4 vCPUs, 4 GiB RAM, an 80 GiB thin-provisioned disk and no guest network. The first installation uses Quickemu's unattended answer file, which accepts the Windows license, selects Windows Pro and creates the local administrator `Quickemu` with the default password `quickemu` and automatic login. This is a disposable lab account, not an activated Windows license. UAC is disabled by the Quickemu answer file. Review `windows-11-English-International/unattended/autounattend.xml` before first boot.
 
+## One-Line Install
+
+Install and register the VM MCP server and agent skill in one line across supported AI agents (Antigravity, Codex, Claude Code):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/anci31d/windows-vm-mcp/master/install.sh | bash
+```
+
+Or if you have already cloned the repository:
+
+```bash
+./install.sh
+```
+
+To remove all MCP registrations and agent skills:
+
+```bash
+./uninstall.sh
+```
+
+The installer automatically detects installed agent CLIs (`agy`, `codex`, `claude`), registers the `windows-ctf` MCP server, links the `windows-vm-mcp` skill, builds the Python virtual environment, and verifies the installation with test suite execution.
+
 ## Documentation index
 
 - [SETUP.md](SETUP.md) - public setup guide for Quickemu, Windows media, VirtIO, the guest agent, MCP clients, and tool updates.

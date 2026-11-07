@@ -1,6 +1,24 @@
 # Setup
 
-This repository contains code, documentation, the Codex skill, and a Quickemu configuration template. It does not contain Windows media, VM disks, firmware state, or Sysinternals archives.
+This repository contains code, documentation, the agent skill, and Quickemu configurations. It does not contain Windows media, VM disks, firmware state, or Sysinternals archives.
+
+## Automated Installation (Recommended)
+
+Run the one-line installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/anci31d/windows-vm-mcp/master/install.sh | bash
+```
+
+Or from a local checkout:
+
+```bash
+./install.sh
+```
+
+The script sets up the Python virtual environment, registers the MCP server with detected AI agent CLIs (`agy`, `codex`, `claude`), links the agent skill, verifies the MCP test suite, and offers to download Windows 11 media via `quickget`.
+
+## Manual Setup
 
 1. Install Quickemu, QEMU/KVM, SPICE, and `spicy` using the official instructions for your distribution.
 2. Download a Windows 11 ISO from Microsoft and the VirtIO driver ISO from the Fedora VirtIO project. Keep both outside git.
