@@ -18,6 +18,43 @@ Or from a local checkout:
 
 The script sets up the Python virtual environment, registers the MCP server with detected AI agent CLIs (`agy`, `codex`, `claude`), links the agent skill, verifies the MCP test suite, and offers to download Windows 11 media via `quickget`.
 
+To display all dependencies from the installer at any time:
+
+```bash
+./install.sh --deps
+```
+
+## System Dependencies
+
+Before running the VM or installer, ensure the host system meets the following requirements:
+
+- **OS / CPU**: Linux x86_64 with hardware virtualization (VT-x / AMD-V) enabled in BIOS/UEFI.
+- **KVM Access**: `/dev/kvm` must be writable by the current user (`sudo usermod -aG kvm $USER`).
+- **QEMU**: `qemu-system-x86_64` package providing system emulation and KVM acceleration.
+- **Quickemu**: Quickemu v4.9+ (`quickemu` and `quickget` commands).
+- **SPICE**: `spicy` viewer (`spice-client-gtk` or `spice-gtk`).
+- **Python**: Python 3.10 or newer with standard library venv support (or `uv`).
+- **Git**: `git` client.
+
+### Package Installation Commands
+
+- **Ubuntu / Debian**:
+  ```bash
+  sudo apt update
+  sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git
+  sudo usermod -aG kvm $USER
+  ```
+- **Arch Linux**:
+  ```bash
+  sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git
+  sudo usermod -aG kvm $USER
+  ```
+- **Fedora**:
+  ```bash
+  sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git
+  sudo usermod -aG kvm $USER
+  ```
+
 ## Manual Setup
 
 1. Install Quickemu, QEMU/KVM, SPICE, and `spicy` using the official instructions for your distribution.

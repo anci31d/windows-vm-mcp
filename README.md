@@ -24,6 +24,39 @@ To remove all MCP registrations and agent skills:
 
 The installer automatically detects installed agent CLIs (`agy`, `codex`, `claude`), registers the `windows-ctf` MCP server, links the `windows-vm-mcp` skill, builds the Python virtual environment, and verifies the installation with test suite execution.
 
+## System Dependencies
+
+| Component | Requirement | Package (Ubuntu/Debian) | Package (Arch Linux) | Package (Fedora) |
+|---|---|---|---|---|
+| **OS** | Linux x86_64 with KVM (`/dev/kvm`) | `qemu-system-x86` | `qemu-desktop` | `qemu-kvm` |
+| **VM Launcher** | Quickemu (v4.9+) | `quickemu` | `quickemu` | `quickemu` |
+| **SPICE Viewer** | `spicy` (for socket & GUI) | `spicy` (`spice-client-gtk`) | `spice-gtk` | `spice-gtk` |
+| **Python** | Python 3.10+ & venv | `python3 python3-venv` | `python` | `python3` |
+| **VCS** | Git | `git` | `git` | `git` |
+| **Fast venv** *(opt)* | `uv` | [astral.sh/uv](https://astral.sh/uv) | `uv` | `uv` |
+| **Multi-agent skills** *(opt)* | Node.js / `npx` | `nodejs npm` | `nodejs npm` | `nodejs npm` |
+
+### Quick Package Installation
+
+- **Ubuntu / Debian**:
+  ```bash
+  sudo apt update && sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git
+  sudo usermod -aG kvm $USER
+  ```
+- **Arch Linux**:
+  ```bash
+  sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git
+  sudo usermod -aG kvm $USER
+  ```
+- **Fedora**:
+  ```bash
+  sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git
+  sudo usermod -aG kvm $USER
+  ```
+
+> [!NOTE]
+> Ensure `/dev/kvm` is enabled in your BIOS/UEFI. After adding your user to the `kvm` group, log out and back in for permissions to take effect.
+
 ## Documentation index
 
 - [SETUP.md](SETUP.md) - public setup guide for Quickemu, Windows media, VirtIO, the guest agent, MCP clients, and tool updates.

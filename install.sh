@@ -27,10 +27,56 @@ error() {
     printf "${RED}[ERROR]${NC} %s\n" "$*" >&2
 }
 
+print_full_dependencies() {
+    echo -e "\n${BOLD}=== Full List of Dependencies ===${NC}"
+    echo -e "${BOLD}1. Host & Virtualization (Required):${NC}"
+    echo "  - OS:           Linux x86_64"
+    echo "  - KVM:          /dev/kvm enabled in BIOS/UEFI and writable by user ($USER)"
+    echo "  - QEMU:         qemu-system-x86_64 (emulator with KVM support)"
+    echo "  - Quickemu:     quickemu (CLI VM orchestrator, v4.9+)"
+    echo "  - SPICE client: spicy (from spice-client-gtk / spice-gtk)"
+    echo
+    echo -e "${BOLD}2. Runtime & Tools (Required):${NC}"
+    echo "  - Python:       python3 (version 3.10+) with python3-venv"
+    echo "  - Git:          git"
+    echo
+    echo -e "${BOLD}3. Optional / Recommended:${NC}"
+    echo "  - Fast Python:  uv (replaces python3-venv for near-instant setups)"
+    echo "  - Node / npx:   nodejs & npx (for universal skill registration)"
+    echo "  - AI Agents:    agy (Antigravity), codex (Codex CLI), claude (Claude Code)"
+    echo "  - VM Media:     Windows 11 ISO + VirtIO ISO (downloadable via 'quickget windows 11')"
+    echo
+    echo -e "${BOLD}Install commands for your distribution:${NC}"
+    echo -e "  ${BOLD}Ubuntu / Debian:${NC}"
+    echo "    sudo apt update"
+    echo "    sudo apt install -y qemu-system-x86 quickemu spicy python3 python3-venv git"
+    echo "    sudo usermod -aG kvm \$USER"
+    echo
+    echo -e "  ${BOLD}Arch Linux:${NC}"
+    echo "    sudo pacman -S --needed qemu-desktop quickemu spice-gtk python git"
+    echo "    sudo usermod -aG kvm \$USER"
+    echo
+    echo -e "  ${BOLD}Fedora:${NC}"
+    echo "    sudo dnf install -y qemu-kvm quickemu spice-gtk python3 git"
+    echo "    sudo usermod -aG kvm \$USER"
+    echo -e "  ${YELLOW}* Note: log out and back in after adding your user to the kvm group.${NC}\n"
+}
+
 AUTO_YES=false
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) AUTO_YES=true ;;
+        --deps|--dependencies)
+            print_full_dependencies
+            exit 0
+            ;;
+        -h|--help)
+            echo "Usage: $0 [-y|--yes] [--deps|--dependencies] [-h|--help]"
+            echo "  -y, --yes          Non-interactive mode (default answers)"
+            echo "  --deps             Display full list of dependencies and package manager commands"
+            echo "  -h, --help         Show this help message"
+            exit 0
+            ;;
     esac
 done
 
@@ -79,11 +125,13 @@ cd "$REPO_DIR"
 
 # 2. Prerequisites Check
 info "Checking system prerequisites..."
+preq_has_issues=false
 os_type="$(uname -s)"
 arch_type="$(uname -m)"
 
 if [[ "$os_type" != "Linux" || "$arch_type" != "x86_64" ]]; then
     warn "This VM environment is designed for Linux x86_64 (KVM). Detected: $os_type $arch_type."
+    preq_has_issues=true
 fi
 
 if [[ -e /dev/kvm ]]; then
@@ -91,25 +139,38 @@ if [[ -e /dev/kvm ]]; then
         info "KVM hardware acceleration is available and writable (/dev/kvm)."
     else
         warn "/dev/kvm exists but is not writable by $USER. Run: sudo usermod -aG kvm $USER (and re-login)."
+        preq_has_issues=true
     fi
 else
-    warn "/dev/kvm not found! Ensure hardware virtualization is enabled in BIOS/UEFI."
+    warn "/dev/kvm not found! Ensure hardware virtualization (VT-x/AMD-V) is enabled in BIOS/UEFI."
+    preq_has_issues=true
 fi
 
 missing_pkgs=()
+if ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
+    missing_pkgs+=("qemu-system-x86_64")
+fi
 if ! command -v quickemu >/dev/null 2>&1; then
     missing_pkgs+=("quickemu")
 fi
 if ! command -v spicy >/dev/null 2>&1; then
     missing_pkgs+=("spicy (spice-client-gtk)")
 fi
+if ! command -v python3 >/dev/null 2>&1; then
+    missing_pkgs+=("python3")
+fi
+if ! command -v git >/dev/null 2>&1; then
+    missing_pkgs+=("git")
+fi
 
 if [[ ${#missing_pkgs[@]} -gt 0 ]]; then
-    warn "Recommended virtualization tools missing: ${missing_pkgs[*]}"
-    warn "Install via your package manager, e.g.:"
-    warn "  Ubuntu/Debian: sudo apt install quickemu spicy"
-    warn "  Arch Linux:    sudo pacman -S quickemu spice-gtk"
-    warn "  Fedora:        sudo dnf install quickemu spice-gtk"
+    warn "Missing required/recommended packages: ${missing_pkgs[*]}"
+    preq_has_issues=true
+fi
+
+if [[ "$preq_has_issues" == "true" ]]; then
+    warn "System prerequisite check encountered warnings or missing components."
+    print_full_dependencies
 fi
 
 # 3. Setup Python Virtual Environment
@@ -154,6 +215,7 @@ fi
 
 if command -v claude >/dev/null 2>&1; then
     info "Registering MCP server in Claude Code..."
+    claude mcp remove -s user windows-ctf >/dev/null 2>&1 || true
     claude mcp add -s user windows-ctf -- "$MCP_EXEC"
     registered_count=$((registered_count + 1))
     success "Registered with Claude Code."
