@@ -4,6 +4,18 @@
 
 ## Подключение
 
+### Автоматическая установка
+
+Для автоматической настройки окружения и регистрации MCP-сервера в доступных агентах (`agy`, `codex`, `claude`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/anci31d/windows-vm-mcp/master/install.sh | bash
+# или локально:
+./install.sh
+```
+
+### Ручная настройка
+
 Зависимость MCP установлена в `.venv` внутри workspace. Для восстановления окружения при необходимости:
 
 ```bash
