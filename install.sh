@@ -60,14 +60,17 @@ elif [[ -n "${WINDOWS_VM_DIR:-}" && -f "$WINDOWS_VM_DIR/bin/windows-vm-mcp" ]]; 
     REPO_DIR="$(cd "$WINDOWS_VM_DIR" && pwd)"
     info "Installing from WINDOWS_VM_DIR: $REPO_DIR"
 else
+    BRANCH="${WINDOWS_VM_BRANCH:-feature/one-line-installer}"
     DEFAULT_TARGET="${WINDOWS_VM_DIR:-$HOME/.local/share/windows-vm-mcp}"
     if [[ -d "$DEFAULT_TARGET/.git" ]]; then
         info "Updating existing repository at $DEFAULT_TARGET..."
-        git -C "$DEFAULT_TARGET" pull --ff-only
+        git -C "$DEFAULT_TARGET" fetch origin "$BRANCH"
+        git -C "$DEFAULT_TARGET" checkout "$BRANCH"
+        git -C "$DEFAULT_TARGET" pull --ff-only origin "$BRANCH"
     else
-        info "Cloning windows-vm-mcp to $DEFAULT_TARGET..."
+        info "Cloning windows-vm-mcp ($BRANCH) to $DEFAULT_TARGET..."
         mkdir -p "$(dirname "$DEFAULT_TARGET")"
-        git clone https://github.com/anci31d/windows-vm-mcp.git "$DEFAULT_TARGET"
+        git clone -b "$BRANCH" https://github.com/anci31d/windows-vm-mcp.git "$DEFAULT_TARGET"
     fi
     REPO_DIR="$DEFAULT_TARGET"
 fi
